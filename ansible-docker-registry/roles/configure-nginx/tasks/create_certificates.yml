@@ -1,0 +1,44 @@
+---
+- name: Create the root key
+  command: openssl genrsa -out {{ docker_registry_nginx_dir }}/{{ nginx_root_cert_key_name }} 2048
+
+- name: Create the root certificate
+  command: >-
+      openssl
+      req
+      -x509
+      -new
+      -nodes
+      -key {{ docker_registry_nginx_dir }}/{{ nginx_root_cert_key_name }}
+      -days 10000
+      -out {{ docker_registry_nginx_dir }}/{{ nginx_root_cert_name }}
+      -subj "/C=AU/ST=Some-State/L=City/O=Organization/OU=OrganizationalUnit/CN={{ docker_registry_fqdn }}"
+
+- name: Create the server key
+  command: openssl genrsa -out {{ docker_registry_nginx_dir }}/{{ nginx_server_cert_key_name }} 2048
+
+- name: Generate the Certificate Signing Request
+  command: >-
+    openssl req
+    -new
+    -key "{{ docker_registry_nginx_dir }}/{{ nginx_server_cert_key_name }}"
+    -out "{{ docker_registry_nginx_dir }}/{{ nginx_server_cert_signing_req_name }}"
+    -subj "/C=AU/ST=Some-State/L=City/O=Organization/OU=OrganizationalUnit/CN={{ docker_registry_fqdn }}"
+
+- name: Sign server certificate request
+  command: >-
+    openssl
+    x509
+    -req
+    -in "{{ docker_registry_nginx_dir }}/{{ nginx_server_cert_signing_req_name }}"
+    -CA "{{ docker_registry_nginx_dir }}/{{ nginx_root_cert_name }}"
+    -CAkey "{{ docker_registry_nginx_dir }}/{{ nginx_root_cert_key_name }}"
+    -CAcreateserial
+    -out "{{ docker_registry_nginx_dir }}/{{ nginx_server_cert_name }}"
+    -days 10000
+
+- name: Create the docker registry ca certificates directory
+  file: path={{ docker_registry_ca_certs_dir }} mode=0755 owner=root group=root state=directory recurse=yes
+
+- name: Copy the docker registry ca certificate to the created ca directory
+  copy: src={{ docker_registry_nginx_dir }}/{{ nginx_root_cert_name }} dest={{ docker_registry_ca_certs_dir }}/{{ nginx_root_cert_name }}

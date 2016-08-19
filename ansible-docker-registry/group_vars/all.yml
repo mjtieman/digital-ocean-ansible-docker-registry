@@ -1,0 +1,20 @@
+---
+docker_registry_fqdn: docker-registry.in.gameplan.com
+droplet_user_password: password
+
+docker_registry_dir: /docker-registry
+docker_registry_data_dir: /docker-registry/data
+docker_registry_nginx_dir: /docker-registry/nginx
+
+nginx_root_cert_key_name: docker-registryCA.key
+nginx_root_cert_name: docker-registryCA.crt
+nginx_server_cert_key_name: domain.key
+nginx_server_cert_name: domain.crt
+nginx_server_cert_signing_req_name: docker-registry-server.csr
+
+docker_registry_ca_certs_dir: /usr/local/share/ca-certificates/docker-registry-cert
+
+# If any of the below variables do have have a value a new key and self-signed certificate will be created
+docker_registry_ca_cert : "" # Name of the ca cert in roles/configure-docker-registry/files
+docker_registry_server_cert : "" # Name of the domain cert in roles/configure-docker-registry/files created from the ca cert
+docker_registry_server_cert_key : "" # Name of the server cert key in roles/configure-docker-registry/files

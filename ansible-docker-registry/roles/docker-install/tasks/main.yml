@@ -1,0 +1,25 @@
+---
+- name: Create the docker group
+  group: name=docker state=present
+
+- name: Add droplet-user to the docker group
+  user: name=droplet-user groups=docker append=yes
+
+- name: Add gpg key for sks key servers
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+
+- name: Copy the docker apt sources file
+  copy: src=docker.list dest=/etc/apt/sources.list.d/docker.list owner=droplet-user group=docker mode=0755
+
+- name: Get the kernel release
+  shell: uname -r
+  register: uname_result
+
+- name: Install linux-image-extra
+  apt: name=linux-image-extra-{{ uname_result.stdout }} update_cache=yes
+
+- name: Install docker
+  apt: name=docker-engine
+
+- name: Install docker-compose
+  apt: name=docker-compose

@@ -1,0 +1,9 @@
+---
+- name: Copy the docker registry ca certificate
+  copy: src={{ docker_registry_ca_cert }} dest={{ docker_registry_ca_certs_dir }}/{{ docker_registry_ca_cert }}
+
+- name: Copy the docker registry server certificate to the nginx conf.d directory
+  copy: src={{ docker_registry_server_cert }} dest={{ docker_registry_nginx_dir }}/{{ nginx_server_cert_name }}
+
+- name: Copy the docker registry certificate key to the nginx conf.d directory
+  copy: src={{ docker_registry_server_cert_key }} dest={{ docker_registry_nginx_dir }}/{{ nginx_server_cert_key_name }}

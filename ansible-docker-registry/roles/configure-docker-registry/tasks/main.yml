@@ -1,0 +1,12 @@
+---
+- name: Create registry directory
+  file: path={{ docker_registry_data_dir }} mode=0755 owner=droplet-user group=docker state=directory recurse=yes
+
+- name: Copy the docker-compose yaml file
+  copy: src=docker-compose.yml dest={{ docker_registry_dir }}/docker-compose.yml owner=droplet-user group=docker mode=0755
+
+- name: Copy the systemd script
+  copy: src=docker-registry.service dest=/etc/systemd/system/docker-registry.service
+
+- name: Enable the docker-registry service. Replace with the systemd module when ansible 2.2 is released
+  command: systemctl enable docker-registry

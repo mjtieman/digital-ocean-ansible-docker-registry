@@ -1,0 +1,32 @@
+{
+    "variables" : {
+        "version" : "",
+        "api-token" : "",
+        "region" : "nyc1",
+        "base-image" : "",
+        "base-snapshot-name" : ""
+    },
+    "builders" : [{
+        "type" : "digitalocean",
+        "api_token" : "{{ user `api-token` }}",
+        "image" : "{{ user `base-image` }}",
+        "region" : "{{ user `region` }}",
+        "size" : "512mb",
+        "private_networking" : true,
+        "snapshot_name" : "{{ user `base-snapshot-name` }}-{{user `version`}}-{{isotime}}"
+    }],
+    "provisioners" : [
+        {
+            "type" : "file",
+            "source" : "../ansible-docker-registry",
+            "destination" : "/home/droplet-user"
+        },
+        {
+            "type" : "ansible-local",
+            "playbook_dir" : "../ansible-docker-registry",
+            "playbook_file" : "../ansible-docker-registry/install.yml",
+            "inventory_file" : "../ansible-docker-registry/inv",
+            "extra_arguments" : "--verbose --limit localhost"
+        }
+    ]
+}

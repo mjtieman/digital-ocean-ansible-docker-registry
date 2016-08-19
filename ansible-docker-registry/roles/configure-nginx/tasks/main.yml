@@ -1,0 +1,30 @@
+---
+- name: Create nginx directory
+  file: path={{ docker_registry_nginx_dir }} mode=0755 owner=droplet-user group=docker state=directory recurse=yes
+
+- name: Copy the nginx configuration file
+  template: src=registry.conf.j2 dest={{ docker_registry_nginx_dir }}/registry.conf
+
+- name: Create and add droplet-user to authentication file
+  shell: htpasswd -bc {{ docker_registry_nginx_dir }}/registry.password droplet-user "{{ droplet_user_password }}"
+
+- name: Create the docker registry ca certificates directory
+  file: path={{ docker_registry_ca_certs_dir }} mode=0755 owner=root group=root state=directory recurse=yes
+
+- name: Create the nginx certificates
+  include: create_certificates.yml
+  when: docker_registry_ca_cert | default("") == "" or docker_registry_server_cert | default("") == "" or docker_registry_ca_cert_key | default("") == ""
+
+- name: Copy the specified nginx certificates
+  include: copy_certificates.yml
+  when: docker_registry_ca_cert | default("") != "" and docker_registry_server_cert | default("") != "" and docker_registry_ca_cert_key | default("") != ""
+
+- name: Update certificates in /etc/ssl/certs
+  command: update-ca-certificates
+
+- name: Update iptables to allow SSL traffic. Use command until ansible 2.2 is released, then use action parameter to insert rule at the top of the chain
+  command: iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT
+
+- name: Persist iptables rules
+  shell: invoke-rc.d netfilter-persistent save
+  become: yes

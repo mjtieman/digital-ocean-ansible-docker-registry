@@ -1,0 +1,13 @@
+---
+  - hosts: all
+    sudo: true
+    tasks:
+      - name: Install apache2-utils
+        apt: name=apache2-utils
+
+  - hosts: all
+    sudo: true
+    roles:
+      - role: docker-install
+      - role: configure-nginx
+      - role: configure-docker-registry

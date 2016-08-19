@@ -1,0 +1,10 @@
+[Unit]
+Description=Docker Registry
+
+[Service]
+WorkingDirectory=/docker-registry
+ExecStart=/usr/bin/docker-compose up
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
